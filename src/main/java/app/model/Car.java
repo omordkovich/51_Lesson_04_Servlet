@@ -15,6 +15,21 @@ public class Car {
         this.year = year;
     }
 
+    public Car() {
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
     public Long getId() {
         return id;
     }

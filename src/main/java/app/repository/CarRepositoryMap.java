@@ -1,9 +1,7 @@
 package app.repository;
-
 import app.model.Car;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,5 +32,10 @@ public class CarRepositoryMap implements ICarRepository {
        car.setId(++currentId);
        database.put(car.getId(), car);
        return car;
+    }
+
+    @Override
+    public Car getById(long id) {
+        return database.getOrDefault(id, null);
     }
 }

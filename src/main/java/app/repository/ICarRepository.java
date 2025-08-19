@@ -8,4 +8,6 @@ public interface ICarRepository {
     List<Car> getAll();
 
     Car save(Car car);
+
+    Car getById(long id);
 }
