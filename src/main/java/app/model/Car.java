@@ -15,6 +15,10 @@ public class Car {
         this.year = year;
     }
 
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     public Car() {
     }
 

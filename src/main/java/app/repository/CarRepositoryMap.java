@@ -1,4 +1,5 @@
 package app.repository;
+
 import app.model.Car;
 
 import java.math.BigDecimal;
@@ -16,9 +17,9 @@ public class CarRepositoryMap implements ICarRepository {
     }
 
     private void initData() {
-        save(new Car("VW", new BigDecimal(15000),2015));
-        save(new Car("Mazda", new BigDecimal(30000),2022));
-        save(new Car("Ford", new BigDecimal(40000),2025));
+        save(new Car("VW", new BigDecimal(15000), 2015));
+        save(new Car("Mazda", new BigDecimal(30000), 2022));
+        save(new Car("Ford", new BigDecimal(40000), 2025));
     }
 
 
@@ -29,13 +30,28 @@ public class CarRepositoryMap implements ICarRepository {
 
     @Override
     public Car save(Car car) {
-       car.setId(++currentId);
-       database.put(car.getId(), car);
-       return car;
+        car.setId(++currentId);
+        database.put(car.getId(), car);
+        return car;
     }
 
     @Override
     public Car getById(long id) {
         return database.getOrDefault(id, null);
+    }
+
+    @Override
+    public Car editCar(long id, BigDecimal price) {
+        Car car = database.get(id);
+        if (car == null) {
+            throw new IllegalArgumentException("Car with id " + id + " not found");
+        }
+        car.setPrice(price);
+        return car;
+    }
+
+    @Override
+    public Car delete(long id) {
+        return database.remove(id);
     }
 }

@@ -2,6 +2,7 @@ package app.repository;
 
 import app.model.Car;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ICarRepository {
@@ -10,4 +11,8 @@ public interface ICarRepository {
     Car save(Car car);
 
     Car getById(long id);
+
+    Car editCar(long id, BigDecimal price);
+
+    Car delete(long id);
 }

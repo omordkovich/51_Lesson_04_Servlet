@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +61,7 @@ public class CarServlet extends HttpServlet {
             long id = Long.parseLong(params.get("id")[0]);
             Car car = repository.getById(id);
 
-            resp.getWriter().write(car==null? "Car wasn't found" : mapper.writeValueAsString(car) + "\n");
+            resp.getWriter().write(car == null ? "Car wasn't found" : mapper.writeValueAsString(car) + "\n");
         }
 
     }
@@ -74,7 +75,7 @@ public class CarServlet extends HttpServlet {
         Car car = mapper.readValue(req.getReader(), Car.class);
         repository.save(car);
         resp.setContentType("application/json");
-       String jsonResponse = mapper.writeValueAsString(car);
+        String jsonResponse = mapper.writeValueAsString(car);
         resp.getWriter().write(jsonResponse);
     }
 
@@ -86,6 +87,15 @@ public class CarServlet extends HttpServlet {
         // для изменения существующего элемента
         // должна поменять цену
         // id; newPrice
+
+        Map<String, String[]> params = req.getParameterMap();
+        long id = Long.parseLong(params.get("id")[0]);
+        BigDecimal newPrice = new BigDecimal(params.get("price")[0]);
+        repository.editCar(id, newPrice);
+
+        Car car = repository.getById(id);
+        ObjectMapper mapper = new ObjectMapper();
+        resp.getWriter().write(car == null ? "Car wasn't found" : mapper.writeValueAsString(car) + "\n");
     }
 
     //TODO: Homework
@@ -94,6 +104,12 @@ public class CarServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Удаление по id
-        super.doDelete(req, resp);
+        Car car = repository.getById(Long.parseLong(req.getParameter("id")));
+        repository.delete(car.getId());
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        resp.setContentType("application/json");
+        resp.getWriter().write(mapper.writeValueAsString(car) + "\n");
     }
 }
