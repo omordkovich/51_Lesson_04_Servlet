@@ -32,6 +32,9 @@ public class CarServlet extends HttpServlet {
 
         // /example?id?5&name=Cat
         // => { "id" : ["5"], "name" : ["Cat"] }
+//TODO:
+        //Homework: minPrice/ sort by Price
+
 
         Map<String, String[]> params = req.getParameterMap();
         //GET http://10.2.3.4;8080/cars?id=3
@@ -71,7 +74,6 @@ public class CarServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         //для сохранения нового элемента в БД
         ObjectMapper mapper = new ObjectMapper();
-
         Car car = mapper.readValue(req.getReader(), Car.class);
         repository.save(car);
         resp.setContentType("application/json");
@@ -87,10 +89,9 @@ public class CarServlet extends HttpServlet {
         // для изменения существующего элемента
         // должна поменять цену
         // id; newPrice
+        long id = Long.parseLong(req.getParameter("id"));
+        BigDecimal newPrice = new BigDecimal(req.getParameter("price"));
 
-        Map<String, String[]> params = req.getParameterMap();
-        long id = Long.parseLong(params.get("id")[0]);
-        BigDecimal newPrice = new BigDecimal(params.get("price")[0]);
         repository.editCar(id, newPrice);
 
         Car car = repository.getById(id);
@@ -104,12 +105,7 @@ public class CarServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Удаление по id
-        Car car = repository.getById(Long.parseLong(req.getParameter("id")));
-        repository.delete(car.getId());
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        resp.setContentType("application/json");
-        resp.getWriter().write(mapper.writeValueAsString(car) + "\n");
+        long id = Long.parseLong(req.getParameter("id"));
+        repository.delete(id);
     }
 }
