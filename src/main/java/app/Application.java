@@ -28,6 +28,9 @@ public class Application {
         for (Car car : cars) {
             System.out.println(car);
         }
+        Car car = repo.getById(3);
+        System.out.println("=============");
+        System.out.println(car);
     }
 
 }

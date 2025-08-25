@@ -69,9 +69,9 @@ public class CarRepositoryDB implements ICarRepository {
 
     @Override
     public Car getById(long id) {
-        PreparedStatement pstmt = null;
+        String sql = "SELECT * FROM cars WHERE id = ?";
         try {
-            pstmt = conn.prepareStatement("SELECT * FROM cars WHERE id = ?");
+            PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setLong(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
