@@ -12,7 +12,11 @@ public interface ICarRepository {
 
     Car getById(long id);
 
-    Car editCar(long id, BigDecimal price);
+    Car update(long id, BigDecimal price);
 
-    Car delete(long id);
+    Car update(Car car);
+
+    void delete(long id);
+
+
 }

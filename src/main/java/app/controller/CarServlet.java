@@ -1,7 +1,7 @@
 package app.controller;
 
 import app.model.Car;
-import app.repository.CarRepositoryMap;
+import app.repository.CarRepositoryDB;
 import app.repository.ICarRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -11,13 +11,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 
 public class CarServlet extends HttpServlet {
-    private final ICarRepository repository = new CarRepositoryMap();
-
+    private final ICarRepository repository = new CarRepositoryDB();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     //GET http://10.2.3.4;8080/cars - all cars
     //GET http://10.2.3.4;8080/cars?id=3 - one car by id
@@ -25,15 +26,13 @@ public class CarServlet extends HttpServlet {
     //Ролучает информацию о cars => метод GET
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // /cars=> должны вернуть все автомабили
+        // /cars=> должны вернуть все автомобили
 
         //request - Это объект запроса.
         //response - Объект ответа.
 
         // /example?id?5&name=Cat
         // => { "id" : ["5"], "name" : ["Cat"] }
-//TODO:
-        //Homework: minPrice/ sort by Price
 
 
         Map<String, String[]> params = req.getParameterMap();
@@ -42,11 +41,16 @@ public class CarServlet extends HttpServlet {
 
         //Установка типа контента для ответа JASON
         resp.setContentType("application/json");
+//            BigInteger minPrice = new BigInteger(req.getParameter("minPrice"));
 
-        ObjectMapper mapper = new ObjectMapper();
 
         if (params.isEmpty()) {
             List<Car> cars = repository.getAll();
+
+            //TODO:
+            //Homework: minPrice/ sort by Price
+            cars = cars.stream()
+                    .sorted(Comparator.comparing(Car::getPrice)).toList();
 
             //Преобразую список в JSON
             String jsonResponse = mapper.writeValueAsString(cars);
@@ -73,7 +77,6 @@ public class CarServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         //для сохранения нового элемента в БД
-        ObjectMapper mapper = new ObjectMapper();
         Car car = mapper.readValue(req.getReader(), Car.class);
         repository.save(car);
         resp.setContentType("application/json");
@@ -89,14 +92,18 @@ public class CarServlet extends HttpServlet {
         // для изменения существующего элемента
         // должна поменять цену
         // id; newPrice
+
+        resp.setContentType("application/json");
         long id = Long.parseLong(req.getParameter("id"));
         BigDecimal newPrice = new BigDecimal(req.getParameter("price"));
 
-        repository.editCar(id, newPrice);
+        Car updatedCar = repository.update(id, newPrice);
 
-        Car car = repository.getById(id);
-        ObjectMapper mapper = new ObjectMapper();
-        resp.getWriter().write(car == null ? "Car wasn't found" : mapper.writeValueAsString(car) + "\n");
+        String json = mapper.writeValueAsString(updatedCar);
+        resp.getWriter().write(json);
+
+        //    /        Car car = repository.getById(id);
+//        resp.getWriter().write(car == null ? "Car wasn't found" : mapper.writeValueAsString(car) + "\n");
     }
 
     //TODO: Homework

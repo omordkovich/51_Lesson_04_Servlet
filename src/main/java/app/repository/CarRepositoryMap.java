@@ -41,8 +41,8 @@ public class CarRepositoryMap implements ICarRepository {
     }
 
     @Override
-    public Car editCar(long id, BigDecimal price) {
-        Car car = database.get(id);
+    public Car update(long id, BigDecimal price) {
+        Car car = database.getOrDefault(id, null);
         if (car == null) {
             throw new IllegalArgumentException("Car with id " + id + " not found");
         }
@@ -51,7 +51,13 @@ public class CarRepositoryMap implements ICarRepository {
     }
 
     @Override
-    public Car delete(long id) {
-        return database.remove(id);
+    public Car update(Car car) {
+        //TODO
+        return database.put(car.getId(), car);
+    }
+
+    @Override
+    public void delete(long id) {
+        database.remove(id);
     }
 }
