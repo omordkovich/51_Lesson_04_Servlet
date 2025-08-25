@@ -12,6 +12,8 @@ import static app.constants.Constants.*;
 public class CarRepositoryDB implements ICarRepository {
     private long currentId;
 
+    //    docker run --name postgres51 -p 5433:5432 -e POSTGRES_USER=my_user -e POSTGRES_PASSWORD=pos1234 -e POSTGRES_DB=c_51_cars -d postgres;
+
     private Connection getConnection() {
         // jdbc:postgresql://10.2.3.5:5432/c_51_cars?user=my_user&password=pos1234
         try {
