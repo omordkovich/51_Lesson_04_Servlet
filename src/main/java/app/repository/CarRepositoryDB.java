@@ -4,13 +4,11 @@ import app.model.Car;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import static app.constants.Constants.*;
 
 public class CarRepositoryDB implements ICarRepository {
-    private long currentId;
 
     //    docker run --name postgres51 -p 5433:5432 -e POSTGRES_USER=my_user -e POSTGRES_PASSWORD=pos1234 -e POSTGRES_DB=c_51_cars -d postgres;
 
@@ -25,78 +23,72 @@ public class CarRepositoryDB implements ICarRepository {
         }
     }
 
-    private Connection conn = getConnection();
-
-
-    public void initData() {
-        save(new Car("VW", new BigDecimal(15000), 2015));
-        save(new Car("Mazda", new BigDecimal(30000), 2022));
-        save(new Car("Ford", new BigDecimal(40000), 2025));
-    }
-
-
     @Override
     public List<Car> getAll() {
-        List<Car> cars = new ArrayList<>();
-        try {
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM cars");
-            while (rs.next()) {
-                Car car = new Car(rs.getString("brand"), rs.getBigDecimal("price"), rs.getInt("year"));
-                car.setId(rs.getLong("id"));
+        try (Connection connection = getConnection()) {
 
-                cars.add(car);
-            }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return cars;
+        return List.of();
     }
 
     @Override
     public Car save(Car car) {
-        try {
-            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO cars (brand, price, year) VALUES (?,?,?)");
-            pstmt.setString(1, car.getBrand());
-            pstmt.setBigDecimal(2, car.getPrice());
-            pstmt.setInt(3, car.getYear());
+        try (Connection connection = getConnection()) {
 
-            car.setId(++currentId);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
+            String query = String.format("INSERT INTO car (brand, price, year) VALUES ('%s', %s, %d);",
+                    car.getBrand(), car.getPrice(), car.getYear());
+            Statement statement = connection.createStatement();
+
+            //execute() - Внесение изменения в базу данных
+            //executeQuery() - для получения данных
+
+            statement.execute(query);
+
+            statement.execute(query, Statement.RETURN_GENERATED_KEYS);
+            //Достать ID из Statement
+            ResultSet resultSet = statement.getGeneratedKeys();
+
+            resultSet.next(); //переходим на первую строку
+            Long id = resultSet.getLong("id");
+
+            car.setId(id);
+
+            return car;
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return car;
     }
 
     @Override
     public Car getById(long id) {
-        String sql = "SELECT * FROM cars WHERE id = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, id);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                Car car = new Car(rs.getString("brand"), rs.getBigDecimal("price"), rs.getInt("year"));
-                car.setId(rs.getLong("id"));
-                return car;
-            } else {
-                return null;
+
+        try (Connection connection = getConnection()) {
+            String query = String.format("SELECT * FROM car WHERE id = %d;", id);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            // Пытаемся переключиться на первую колонку
+            if (resultSet.next()) {
+                String brand = resultSet.getString("brand");
+                BigDecimal price = resultSet.getBigDecimal("price");
+                int year = resultSet.getInt("year");
+                return new Car(id, brand, price, year);
             }
-        } catch (SQLException e) {
+            return null;
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public Car update(long id, BigDecimal price) {
-        String sql = "UPDATE cars SET price = ? WHERE id = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setBigDecimal(1, price);
-            pstmt.setLong(2, id);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
+        try (Connection connection = getConnection()) {
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return null;
@@ -104,13 +96,9 @@ public class CarRepositoryDB implements ICarRepository {
 
     @Override
     public Car update(Car car) {
-        String sql = "UPDATE cars SET price = ? WHERE id = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setBigDecimal(1, car.getPrice());
-            pstmt.setLong(2, car.getId());
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
+        try (Connection connection = getConnection()) {
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return null;
@@ -118,23 +106,26 @@ public class CarRepositoryDB implements ICarRepository {
 
     @Override
     public void delete(long id) {
-        String sql = "DELETE FROM cars WHERE id = ?";
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setLong(1, id);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
+        try (Connection connection = getConnection()) {
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    public void createData() {
-        String sql = "CREATE TABLE IF NOT EXISTS cars (id SERIAL PRIMARY KEY, brand VARCHAR(50) NOT NULL, price NUMERIC(10,2) NOT NULL, year INT NOT NULL );";
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-            initData();
-        } catch (SQLException e) {
+    public void test(Car car) {
+        try (Connection connection = getConnection()) {
+            String sql = "INSERT INTO car (brand, price, year) VALUES (?, ?, ?);";
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+
+            ps.setString(1, car.getBrand());
+            ps.setBigDecimal(2, car.getPrice());
+            ps.setInt(3, car.getYear());
+
+            int rowsInserted = ps.executeUpdate();
+
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

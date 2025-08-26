@@ -2,6 +2,7 @@ package app.controller;
 
 import app.model.Car;
 import app.repository.CarRepositoryDB;
+import app.repository.CarRepositoryHibernate;
 import app.repository.ICarRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 
 public class CarServlet extends HttpServlet {
-    private final ICarRepository repository = new CarRepositoryDB();
+    private final ICarRepository repository = new CarRepositoryHibernate();
     private final ObjectMapper mapper = new ObjectMapper();
 
     //GET http://10.2.3.4;8080/cars - all cars
