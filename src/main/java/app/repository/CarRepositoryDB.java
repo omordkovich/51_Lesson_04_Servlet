@@ -4,6 +4,7 @@ import app.model.Car;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import static app.constants.Constants.*;
@@ -25,12 +26,24 @@ public class CarRepositoryDB implements ICarRepository {
 
     @Override
     public List<Car> getAll() {
-        try (Connection connection = getConnection()) {
+        List<Car> cars = new ArrayList<>();
+        String query = "SELECT * FROM cars";
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
 
+            while (resultSet.next()) {
+                Car car = new Car(
+                        resultSet.getString("brand"),
+                        resultSet.getBigDecimal("price"),
+                        resultSet.getInt("year"));
+                car.setId(resultSet.getLong("id"));
+                cars.add(car);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return List.of();
+        return cars;
     }
 
     @Override
@@ -86,28 +99,46 @@ public class CarRepositoryDB implements ICarRepository {
 
     @Override
     public Car update(long id, BigDecimal price) {
+        String query = String.format("UPDATE car SET price = %s WHERE id = %d;", price, id);
         try (Connection connection = getConnection()) {
-
+            Statement statement = connection.createStatement();
+            int rows = statement.executeUpdate(query);
+            if (rows == 0) {
+                System.out.println("No rows affected!");
+                return null;
+            }
+            return getById(id);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
     public Car update(Car car) {
+        String query = String.format("UPDATE car SET price = %s WHERE id = %d;", car.getPrice(), car.getId());
         try (Connection connection = getConnection()) {
-
+            Statement statement = connection.createStatement();
+            int rows = statement.executeUpdate(query);
+            if (rows == 0) {
+                System.out.println("No car was found!");
+                return null;
+            }
+            return car;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
     public void delete(long id) {
-        try (Connection connection = getConnection()) {
+        String query = String.format("DELETE FROM car WHERE id = %d;", id);
 
+        try (Connection connection = getConnection()) {
+            Statement statement = connection.createStatement();
+            int rows = statement.executeUpdate(query);
+            if (rows == 0) {
+                System.out.println("No car was found!");
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -44,7 +44,6 @@ public class CarRepositoryDB_Homework implements ICarRepository {
             while (rs.next()) {
                 Car car = new Car(rs.getString("brand"), rs.getBigDecimal("price"), rs.getInt("year"));
                 car.setId(rs.getLong("id"));
-
                 cars.add(car);
             }
         } catch (SQLException e) {
